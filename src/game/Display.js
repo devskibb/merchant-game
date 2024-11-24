@@ -64,11 +64,18 @@ export class Display {
         }
     }
 
-    drawColoredText(x, y, text, color = 'white') {
+    drawColoredText(x, y, text, color = 'white', useCustomFont = false) {
         if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
             const chars = text.split('');
             for (let i = 0; i < chars.length && x + i < this.width; i++) {
-                this.buffer[y][x + i] = `${this.colors[color]}${chars[i]}${this.colors.end}`;
+                const colorStyle = this.colors[color].slice(19, -2);
+                if (useCustomFont) {
+                    // Complete self-contained span with both color and custom font
+                    this.buffer[y][x + i] = `<span style="color: ${colorStyle}; display: inline-block; width: 1ch;"><span style="font-family: 'chars'">${chars[i]}</span></span>`;
+                } else {
+                    // Single span for regular characters
+                    this.buffer[y][x + i] = `<span style="color: ${colorStyle}">${chars[i]}</span>`;
+                }
             }
         }
     }
@@ -93,27 +100,30 @@ export class Display {
     }
 
     drawBox(x, y, width, height, title = '') {
-        // Draw corners
-        this.draw(x, y, '┌');
-        this.draw(x + width - 1, y, '┐');
-        this.draw(x, y + height - 1, '└');
-        this.draw(x + width - 1, y + height - 1, '┘');
+        // Draw corners (without spans)
+        this.buffer[y][x] = '┌';
+        this.buffer[y][x + width - 1] = '┐';
+        this.buffer[y + height - 1][x] = '└';
+        this.buffer[y + height - 1][x + width - 1] = '┘';
 
-        // Draw horizontal borders
+        // Draw horizontal borders (without spans)
         for (let i = 1; i < width - 1; i++) {
-            this.draw(x + i, y, '─');
-            this.draw(x + i, y + height - 1, '─');
+            this.buffer[y][x + i] = '─';
+            this.buffer[y + height - 1][x + i] = '─';
         }
 
-        // Draw vertical borders
+        // Draw vertical borders (without spans)
         for (let i = 1; i < height - 1; i++) {
-            this.draw(x, y + i, '│');
-            this.draw(x + width - 1, y + i, '│');
+            this.buffer[y + i][x] = '│';
+            this.buffer[y + i][x + width - 1] = '│';
         }
 
-        // Draw title
+        // Draw title if provided
         if (title) {
-            this.draw(x + 2, y, `─ ${title} `);
+            const titleText = ` ${title} `;
+            for (let i = 0; i < titleText.length; i++) {
+                this.buffer[y][x + 2 + i] = titleText[i];
+            }
         }
     }
 
@@ -150,7 +160,7 @@ export class Display {
                          customer.type === 'blob' ? 'green' :
                          customer.type === 'tentacle' ? 'cyan' : 'yellow';
             
-            this.drawColoredText(Math.floor(customer.x), y, customer.symbol, color);
+            this.drawColoredText(Math.floor(customer.x), y, customer.symbol, color, true);
 
             // Draw messages
             if (customer.message) {

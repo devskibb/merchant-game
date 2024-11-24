@@ -15,7 +15,7 @@ export class Game {
         this.maxCustomers = 5;
         this.selectedItem = null;
         this.queueStartX = 39;
-        this.queueSpacing = 1;
+        this.queueSpacing = 2;
         this.isHaggling = false;
         this.counterX = 36;
         this.counterY = 5;

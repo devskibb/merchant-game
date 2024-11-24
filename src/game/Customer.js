@@ -10,8 +10,8 @@ export class Customer {
         this.warningTimer = 0;
         this.symbol = this.getSymbolForType();
         
-        this.x = 80;
-        this.targetX = 76;
+        this.x = 75;
+        this.targetX = Math.min(76, this.width - 4);
         this.desiredItem = '';
         this.isLeaving = false;
         this.y = 6;
@@ -33,9 +33,9 @@ export class Customer {
 
     getSymbolForType() {
         switch(this.type) {
-            case 'blob': return '@';
-            case 'tentacle': return '^';
-            case 'crystal': return '#';
+            case 'blob': return 'B';
+            case 'tentacle': return 'A';
+            case 'crystal': return 'C';
             default: return '?';
         }
     }
